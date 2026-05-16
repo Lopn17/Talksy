@@ -74,6 +74,13 @@
         font-family: 'DM Sans', sans-serif;
     }
 
+    .s-cell.mine   { color: var(--accent); }        /* orange — already your accent */
+    .s-cell.theirs { color: #3b82f6; }              /* blue */
+
+    /* keep selected state readable */
+    .s-cell.selected.mine,
+    .s-cell.selected.theirs { color: #fff; }
+
     /* 3×3 box separators */
     .s-cell[data-col="2"], 
     .s-cell[data-col="5"] { 
@@ -587,11 +594,12 @@
         </div>
     </div>
 </div>
-
+<meta name="session-id" content="{{ session()->getId() }}">
 <script>
     // ── Config ────────────────────────────────────────────────────────
 const CSRF   = document.querySelector('meta[name="csrf-token"]').content;
 const LEVELS = ['Easy','Medium','Hard','Very Hard','Insane','Inhuman'];
+const MY_SESSION = document.querySelector('meta[name="session-id"]').content;
 
 const post = (url, data = {}) =>
     fetch(url, {
@@ -671,11 +679,12 @@ const renderNotes = (cell, idx) => {
 };
 
 // ── Render ────────────────────────────────────────────────────────
-const renderBoard = (puzzle, board) => {
+const renderBoard = (puzzle, board, authors) => {
     cells.forEach((cell, i) => {
-        const row  = Math.floor(i / 9), col = i % 9;
-        const clue = puzzle[row][col];
-        const val  = board[row][col];
+        const row    = Math.floor(i / 9), col = i % 9;
+        const clue   = puzzle[row][col];
+        const val    = board[row][col];
+        const author = authors?.[row]?.[col];
 
         cell.className = 's-cell';
         cell.dataset.row = row;
@@ -690,7 +699,11 @@ const renderBoard = (puzzle, board) => {
         } else if (val !== 0) {
             cell.textContent = val;
             cell.setAttribute('data-value', val);
-            notes[i].clear(); // angka sudah terisi, hapus notes
+            notes[i].clear();
+
+            // Color by author
+            if (author === MY_SESSION) cell.classList.add('mine');
+            else if (author)           cell.classList.add('theirs');
         } else if (notes[i].size > 0) {
             renderNotes(cell, i);
         }
@@ -752,7 +765,7 @@ const poll = () => {
 
         if (data.completed) {
             currentPuzzle = data.puzzle;
-            renderBoard(data.puzzle, data.board);
+            renderBoard(data.puzzle, data.board, data.authors);
             doneTime.textContent = showTime(data.seconds);
             doneOverlay.classList.add('active');
             pauseOverlay.classList.remove('active');
@@ -766,7 +779,7 @@ const poll = () => {
         if (boardStr !== lastBoardStr || !currentPuzzle) {
             lastBoardStr  = boardStr;
             currentPuzzle = data.puzzle;
-            renderBoard(data.puzzle, data.board);
+            renderBoard(data.puzzle, data.board, data.authors);
         }
     }).catch(() => {});
 };

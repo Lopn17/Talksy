@@ -46,6 +46,7 @@ class SudokuController extends Controller
             'seconds'   => $game['seconds'],
             'paused'    => $game['paused'],
             'completed' => $game['completed'],
+            'authors'   => $game['authors'],
         ]);
     }
 
@@ -67,6 +68,7 @@ class SudokuController extends Controller
             'paused'     => false,
             'completed'  => false,
             'started_at' => time(),
+            'authors' => array_fill(0, 9, array_fill(0, 9, null)),
         ]);
 
         return response()->json(['status' => 'started']);
@@ -92,7 +94,15 @@ class SudokuController extends Controller
             return response()->json(['error' => 'Cannot overwrite clue'], 422);
         }
 
+        // value = 0 means delete — clear author first
+        if ($request->value === 0) {
+            $game['authors'][$request->row][$request->col] = null;
+        } else {
+            $game['authors'][$request->row][$request->col] = session()->getId();
+        }
+
         $game['board'][$request->row][$request->col] = $request->value;
+        $game['authors'][$request->row][$request->col] = session()->getId();
 
         if ($this->isSolved($game['board'], $game['solution'])) {
             $game['completed'] = true;
@@ -104,6 +114,7 @@ class SudokuController extends Controller
         return response()->json([
             'status'    => $game['completed'] ? 'completed' : 'active',
             'board'     => $game['board'],
+            'authors'   => $game['authors'],
             'completed' => $game['completed'],
             'seconds'   => $game['seconds'],
         ]);
