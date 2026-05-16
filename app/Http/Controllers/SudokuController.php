@@ -198,15 +198,14 @@ class SudokuController extends Controller
 
     private function removeCells(array $grid, int $count): array
     {
-        $attempts = $count;
-        while ($attempts > 0) {
-            $row = rand(0, 8);
-            $col = rand(0, 8);
-            if ($grid[$row][$col] !== 0) {
-                $grid[$row][$col] = 0;
-                $attempts--;
-            }
+        $cells = range(0, 80);
+        shuffle($cells);
+        $toRemove = array_slice($cells, 0, $count);
+        
+        foreach ($toRemove as $idx) {
+            $grid[intdiv($idx, 9)][$idx % 9] = 0;
         }
+        
         return $grid;
     }
 
