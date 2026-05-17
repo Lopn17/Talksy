@@ -455,6 +455,9 @@
                 </svg>
                 Memory Game
             </a>
+            <a href="/games/animal-chess" class="nav-item {{ request()->is('games/animal-chess*') ? 'active' : '' }}" onclick="closeSidebar()">
+                🐾 Animal Chess
+            </a>
         </nav>
 
         <div class="sidebar-footer">

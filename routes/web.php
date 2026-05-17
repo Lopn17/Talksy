@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AnimalChessController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CatchController;
 use App\Http\Controllers\ChatController;
@@ -86,6 +87,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/games/memory/resolve',     [MemoryController::class, 'resolve']);
     Route::post('/games/memory/player',      [MemoryController::class, 'addPlayer']);
     Route::delete('/games/memory/player/{id}', [MemoryController::class, 'removePlayer']);
+
+    Route::get('/games/animal-chess',        [AnimalChessController::class, 'index']);
+    Route::get('/games/animal-chess/state',  [AnimalChessController::class, 'state']);
+    Route::post('/games/animal-chess/move',  [AnimalChessController::class, 'move']);
+    Route::post('/games/animal-chess/reset', [AnimalChessController::class, 'reset']);
 
 });
 
